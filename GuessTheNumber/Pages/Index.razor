@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.Text.RegularExpressions;
+@inject IScoreboardConnector ScoreboardConnector
 
 <PageTitle>Guess the Number!</PageTitle>
 <h1>Guess the Number!</h1>
@@ -36,7 +37,23 @@
 @if (isCorrect)
 {
     <p>YOU GOT IT!</p>
+    @if (IsTopScore() && string.IsNullOrEmpty(currentPlayerInitials))
+    {
+        <!-- Allow Player to Enter Initials -->
+        <input type="text" @bind="currentPlayerInitials" maxlength="3" />
+        <button @onclick="SaveScore">Save Score</button>
+    }
 }
+<!-- Display Scoreboard in the top right -->
+<div style="position: absolute; top: 10px; right: 10px;">
+    <h3>Top 5 Scores</h3>
+    <ul>
+        @foreach (var score in topScores)
+        {
+            <li>@score.PlayerInitials: @score.Attempts attempts</li>
+        }
+    </ul>
+</div>
 
 @code {
     private int currentCount = 0;
@@ -46,6 +63,9 @@
     private Guess currentGuess = new Guess();
     private string _inputNumber;
     private bool buttonDisabled = true;
+    private IScoreboardConnector scoreboardConnector = new InMemoryScoreboardConnector();
+    private List<ScoreEntry> topScores = new List<ScoreEntry>();
+    private string currentPlayerInitials = "";
 
     //constructor
     public Index()
@@ -90,12 +110,38 @@
         if (currentGuess.NumberCorrect == 3 && currentGuess.NumberInRightPlace == 3)
         {
             isCorrect = true;
+            GameWon();
         }
+
         previousGuesses.Insert(0, currentGuess);  // Add the guess to the history after checking it
         currentGuess = new Guess();  // Then create a new instance for the next guess
         InputNumber = string.Empty;
     }
 
+    private void GameWon()
+    {
+        topScores = scoreboardConnector.GetTopScores(5);
+        if (IsTopScore())
+        {
+            // Prompt user to enter initials
+        }
+        else
+        {
+            currentPlayerInitials = "";  // Reset
+        }
+    }
+
+    private bool IsTopScore()
+    {
+        return topScores.Count < 5 || currentCount <= topScores.Last().Attempts;
+    }
+
+    private void SaveScore()
+    {
+        scoreboardConnector.AddScore(new ScoreEntry { PlayerInitials = currentPlayerInitials, Attempts = currentCount });
+        currentPlayerInitials = "";  // Reset
+        topScores = scoreboardConnector.GetTopScores(5);
+    }
 
     private void GenerateNumber()
     {
@@ -128,5 +174,6 @@
         GenerateNumber();
         currentGuess = new Guess();
         InputNumber = string.Empty;
+        isCorrect = false;
     }
 }

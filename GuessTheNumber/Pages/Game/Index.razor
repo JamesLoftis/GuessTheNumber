@@ -1,10 +1,7 @@
 ﻿@page "/"
 @using System.Text.RegularExpressions;
-<<<<<<< HEAD:GuessTheNumber/Pages/Index.razor
 @inject IScoreboardConnector ScoreboardConnector
-=======
 @inject StateContainer StateContainer
->>>>>>> main:GuessTheNumber/Pages/Game/Index.razor
 
 <PageTitle>Guess the Number!</PageTitle>
 <h1>Guess the correct @StateContainer.Digits.ToString() digit number!</h1>
@@ -67,13 +64,10 @@
     private Guess currentGuess = new Guess();
     private string _inputNumber = string.Empty;
     private bool buttonDisabled = true;
-<<<<<<< HEAD:GuessTheNumber/Pages/Index.razor
     private IScoreboardConnector scoreboardConnector = new InMemoryScoreboardConnector();
     private List<ScoreEntry> topScores = new List<ScoreEntry>();
     private string currentPlayerInitials = "";
-=======
     private const int STARTING_DIGIT = 3;
->>>>>>> main:GuessTheNumber/Pages/Game/Index.razor
 
     protected override void OnInitialized()
     {

@@ -1,9 +1,11 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+@inject StateContainer StateContainer
 
 <div class="page">
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <a href="@LinkAddress">@LinkText</a>
         </div>
 
         <article class="content px-4">
@@ -11,3 +13,8 @@
         </article>
     </main>
 </div>
+
+@code {
+    private string LinkText => NavManager.Uri.EndsWith("/game/options") ? "HOME" : "Options";
+    private string LinkAddress => NavManager.Uri.EndsWith("/game/options") ? "/" : "/game/options";
+}

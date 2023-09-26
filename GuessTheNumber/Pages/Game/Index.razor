@@ -1,8 +1,9 @@
 ﻿@page "/"
 @using System.Text.RegularExpressions;
+@inject StateContainer StateContainer
 
 <PageTitle>Guess the Number!</PageTitle>
-<h1>Guess the Number!</h1>
+<h1>Guess the correct @StateContainer.Digits.ToString() digit number!</h1>
 
 <p role="status">Number of guesses: @currentCount</p>
 <p role="status">Number Correct: @currentGuess.NumberCorrect</p>
@@ -40,38 +41,45 @@
 
 @code {
     private int currentCount = 0;
-    private int[] currentTarget = new int[3];
+    private int[] currentTarget;
     private bool isCorrect = false;
     private List<Guess> previousGuesses = new List<Guess>();
     private Guess currentGuess = new Guess();
-    private string _inputNumber;
+    private string _inputNumber = string.Empty;
     private bool buttonDisabled = true;
+    private const int STARTING_DIGIT = 3;
 
-    //constructor
-    public Index()
+    protected override void OnInitialized()
     {
+        if (StateContainer.Digits == 0)
+        {
+            StateContainer.Digits = STARTING_DIGIT;
+        }
+        currentTarget = new int[StateContainer.Digits];
         ResetGame();
     }
-
 
     public string InputNumber
     {
         get => _inputNumber;
         set
         {
-            // Validate for 1 to 3 numeric characters only and no leading zeros
-            if (Regex.IsMatch(value, @"^[1-9]{0,3}$"))
+            if (Regex.IsMatch(value, @"^[1-9]{0," + StateContainer.Digits + "}$"))
             {
                 _inputNumber = value;
-
-                if (_inputNumber.Length == 3)
+                if (currentTarget.Length != StateContainer.Digits)
+                {
+                    ResetGame();
+                    return;
+                }
+                if (_inputNumber.Length == StateContainer.Digits)
                 {
                     currentGuess.Number = int.Parse(_inputNumber);
-                    buttonDisabled = false; // Enable the button when input is a valid 3-digit number
+                    buttonDisabled = false; 
                 }
                 else
                 {
-                    buttonDisabled = true; // Disable the button otherwise
+                    buttonDisabled = true;
                 }
             }
         }
@@ -87,7 +95,7 @@
 
         IncrementCount();
         currentGuess.CheckNumbers(currentTarget);
-        if (currentGuess.NumberCorrect == 3 && currentGuess.NumberInRightPlace == 3)
+        if (currentGuess.NumberCorrect == StateContainer.Digits && currentGuess.NumberInRightPlace == StateContainer.Digits)
         {
             isCorrect = true;
         }
@@ -107,7 +115,7 @@
             startingPool.Add(i);
         }
 
-        for(var i = 0; i < 3; i++)
+        for(var i = 0; i < StateContainer.Digits; i++)
         {
             startingPool.Shuffle();
             var index = rnd.Next(0, startingPool.Count);
@@ -123,10 +131,12 @@
 
     private void ResetGame()
     {
+        currentTarget = new int[StateContainer.Digits];
         currentCount = 0;
         previousGuesses.Clear();
         GenerateNumber();
         currentGuess = new Guess();
         InputNumber = string.Empty;
+        isCorrect = false;
     }
 }

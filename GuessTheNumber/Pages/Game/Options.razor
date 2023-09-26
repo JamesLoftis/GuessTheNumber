@@ -1,0 +1,37 @@
+﻿@inject StateContainer StateContainer
+
+@page "/game/options"
+<PageTitle>Guess the Number! - Options</PageTitle>
+<h1>Guess the Number! - Options</h1>
+
+<p role="status">Number of digits:<input type="text" @bind="digitsString" /></p>
+<button class="btn btn-primary" @onclick="Save">Save</button>
+
+@code {
+    protected override void OnInitialized()
+    {
+        digitsString = "3";
+        StateContainer.OnChange += StateHasChanged;
+    }
+
+    private string digitsString;
+
+    public void Save()
+    {
+        int digits = 3;
+        var success = int.TryParse(digitsString, out digits);
+        if (digits >= 1 && digits <= 9)
+        {
+            if (success)
+            {
+                StateContainer.Digits = digits;
+            }
+        }
+    }
+    
+    public void Dispose()
+    {
+        StateContainer.OnChange -= StateHasChanged;
+    }
+    
+}

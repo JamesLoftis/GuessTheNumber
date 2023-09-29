@@ -3,3 +3,5 @@
 **/obj/
 
 **/.vs/
+/GuessTheNumber/Properties/PublishProfiles
+/GuessTheNumber/GuessTheNumber.csproj.user
